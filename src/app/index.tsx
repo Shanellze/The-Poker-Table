@@ -1,15 +1,21 @@
+import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>The Poker Table</Text>
 
       <Pressable
         onPress={() => {
-          console.log("Pressable Pressed");
+          router.push("/game");
         }}
-        style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+        style={({ pressed }) => [
+          styles.button,
+          pressed && styles.buttonPressed,
+        ]}
       >
         <Text style={styles.buttonText}>PLAY</Text>
       </Pressable>
@@ -18,7 +24,10 @@ export default function Index() {
         onPress={() => {
           console.log("Pressable Pressed");
         }}
-        style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+        style={({ pressed }) => [
+          styles.button,
+          pressed && styles.buttonPressed,
+        ]}
       >
         <Text style={styles.buttonText}>SETTINGS</Text>
       </Pressable>
