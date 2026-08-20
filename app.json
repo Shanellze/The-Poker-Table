@@ -3,7 +3,7 @@
     "name": "The-Poker-Table",
     "slug": "The-Poker-Table",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/images/icon.png",
     "scheme": "thepokertable",
     "userInterfaceStyle": "automatic",
