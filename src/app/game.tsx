@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function Index() {
+export default function Game() {
   return (
     <View style={styles.container}>
       {/* Displays the payout multipliers and winning combination hierarchies */}
