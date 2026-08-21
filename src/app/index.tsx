@@ -98,6 +98,19 @@ export default function Index() {
           </View>
         </View>
       </Modal>
+
+      {/* Instructions Button */}
+      <Pressable
+        onPress={() => {
+          router.push("/instructions");
+        }}
+        style={({ pressed }) => [
+          styles.button,
+          pressed && styles.buttonPressed,
+        ]}
+      >
+        <Text style={styles.buttonText}>INSTRUCTIONS</Text>
+      </Pressable>
     </View>
   );
 }

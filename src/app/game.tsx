@@ -1,8 +1,23 @@
+import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function Game() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
+      <Pressable
+        onPress={() => {
+          router.push("/instructions");
+        }}
+        style={({ pressed }) => [
+          styles.instructionButton,
+          pressed && styles.instructionButtonPressed,
+        ]}
+      >
+        <Text style={styles.instructionButtonText}>i</Text>
+      </Pressable>
+
       {/* Displays the payout multipliers and winning combination hierarchies */}
       <View style={styles.ruleContainer}>
         <View style={styles.rule}>
@@ -133,6 +148,27 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  instructionButton: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: "#f1f1f1",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  instructionButtonPressed: {
+    backgroundColor: "#d9d9d9",
+  },
+  instructionButtonText: {
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 22,
+    color: "#1a1a1a",
   },
   ruleContainer: {
     flexDirection: "row",
