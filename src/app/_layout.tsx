@@ -7,6 +7,10 @@ export default function RootLayout() {
         name="instructions"
         options={{ presentation: "transparentModal", animation: "fade" }}
       />
+      <Stack.Screen
+        name="settings"
+        options={{ presentation: "transparentModal", animation: "fade" }}
+      />
     </Stack>
   );
 }
