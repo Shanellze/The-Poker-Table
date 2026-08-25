@@ -52,7 +52,7 @@ export default function Settings() {
             pressed && styles.buttonPressed,
           ]}
         >
-          <Text style={styles.buttonText}>CLOSE</Text>
+          <Text style={styles.buttonText}>OK</Text>
         </Pressable>
       </View>
     </View>
