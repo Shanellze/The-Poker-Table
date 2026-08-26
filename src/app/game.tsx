@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { ActionButton } from "../components/actionButton";
@@ -14,9 +15,11 @@ import {
   swapSelectedCards,
   type Card,
 } from "../utils/deck";
+import { RULES } from "../utils/rule";
 import { evaluateHand } from "../utils/winningHands";
 
 export default function Game() {
+  const router = useRouter();
   const maxBalance = 1000;
   const [cards, setCards] = useState<Card[]>([]);
   const [remainingDeck, setRemainingDeck] = useState<Card[]>([]);
@@ -47,6 +50,7 @@ export default function Game() {
     const parsedBet = Number(betInput) || 0;
     const safeBet = Math.min(Math.max(Math.round(parsedBet), 1), balance);
 
+    setBalance((currentBalance) => currentBalance - safeBet);
     setBet(safeBet);
     setBetInput(String(safeBet));
     dealRound();
@@ -83,12 +87,28 @@ export default function Game() {
     }
 
     const evaluatedHand = evaluateHand(nextHand);
+    const hasWon = evaluatedHand !== "Nothing";
+    const payoutRule = RULES.find((rule) => rule.name === evaluatedHand);
+    const multiplier = payoutRule ? Number(payoutRule.multiplier.slice(1)) : 0;
 
     setCards(nextHand);
     setRemainingDeck(nextDeck);
     setSelectedCards([false, false, false, false, false]);
-    setHandResult(evaluatedHand === "Nothing" ? "Nothing" : evaluatedHand);
+
+    if (hasWon) {
+      const winnings = bet * multiplier;
+      setBalance((currentBalance) => currentBalance + winnings);
+      setBet(winnings);
+      setHandResult(`Won - ${evaluatedHand} (${winnings})`);
+      return;
+    }
+
+    setHandResult(
+      `Lost - ${evaluatedHand === "Nothing" ? "No Pair" : evaluatedHand}`,
+    );
   };
+
+  const isRoundResolved = handResult !== "Pending";
 
   return (
     <View style={styles.container}>
@@ -104,6 +124,7 @@ export default function Game() {
             const cleaned = value.replace(/[^\d]/g, "");
             const numericValue = Number(cleaned || "0");
             const cappedValue = Math.min(numericValue, balance);
+            setBet(cappedValue);
             setBetInput(String(cappedValue));
           }}
         />
@@ -139,7 +160,12 @@ export default function Game() {
         </View>
       ) : (
         <View style={styles.actionContainer}>
-          <ActionButton label="CONFIRM" onPress={handleConfirmTurn} />
+          <ActionButton
+            label={isRoundResolved ? "MAIN MENU" : "CONFIRM"}
+            onPress={
+              isRoundResolved ? () => router.replace("/") : handleConfirmTurn
+            }
+          />
         </View>
       )}
     </View>
