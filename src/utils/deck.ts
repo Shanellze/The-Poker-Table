@@ -125,3 +125,25 @@ export function createFreshDeck(): { deck: Card[]; shuffledDeck: Card[] } {
 
   return { deck, shuffledDeck };
 }
+
+export function swapSelectedCards(
+  hand: Card[],
+  selectedIndexes: number[],
+  remainingDeck: Card[],
+): { updatedHand: Card[]; updatedRemainingDeck: Card[] } {
+  const nextHand = [...hand];
+  const nextDeck = [...remainingDeck];
+
+  selectedIndexes.forEach((index) => {
+    const replacementCard = nextDeck.shift();
+
+    if (replacementCard) {
+      nextHand[index] = replacementCard;
+    }
+  });
+
+  return {
+    updatedHand: nextHand,
+    updatedRemainingDeck: nextDeck,
+  };
+}

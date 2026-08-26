@@ -1,7 +1,12 @@
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { createFreshDeck, dealHand, type Card } from "../utils/deck";
+import {
+  createFreshDeck,
+  dealHand,
+  swapSelectedCards,
+  type Card,
+} from "../utils/deck";
 
 const cardImageMap: Record<string, any> = {
   "2-hearts": require("../../assets/images/cards/2_of_hearts.png"),
@@ -67,12 +72,49 @@ function getCardImageSource(card: Card) {
 export default function Game() {
   const router = useRouter();
   const [cards, setCards] = useState<Card[]>([]);
+  const [remainingDeck, setRemainingDeck] = useState<Card[]>([]);
+  const [selectedCards, setSelectedCards] = useState<boolean[]>([
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]);
 
   useEffect(() => {
     const { shuffledDeck } = createFreshDeck();
-    const { hand } = dealHand(shuffledDeck, 5);
+    const { hand, remainingDeck: leftDeck } = dealHand(shuffledDeck, 5);
     setCards(hand);
+    setRemainingDeck(leftDeck);
   }, []);
+
+  const toggleCardSelection = (index: number) => {
+    setSelectedCards((current) =>
+      current.map((selected, currentIndex) =>
+        currentIndex === index ? !selected : selected,
+      ),
+    );
+  };
+
+  const handleSwapCards = () => {
+    const indexesToSwap = selectedCards
+      .map((selected, index) => (selected ? index : -1))
+      .filter((index) => index >= 0);
+
+    if (indexesToSwap.length === 0) {
+      return;
+    }
+
+    const { updatedHand, updatedRemainingDeck } = swapSelectedCards(
+      cards,
+      indexesToSwap,
+      remainingDeck,
+    );
+
+    setCards(updatedHand);
+    setRemainingDeck(updatedRemainingDeck);
+    setSelectedCards([false, false, false, false, false]);
+  };
 
   return (
     <View style={styles.container}>
@@ -138,33 +180,30 @@ export default function Game() {
 
       {/* Displays which cards are held and which are swapped */}
       <View style={styles.holdCardContainer}>
-        <View style={styles.holdCard}>
-          <Text>Hold</Text>
-        </View>
-        <View style={styles.swapCard}>
-          <Text>Swap</Text>
-        </View>
-        <View style={styles.holdCard}>
-          <Text>Hold</Text>
-        </View>
-        <View style={styles.holdCard}>
-          <Text>Hold</Text>
-        </View>
-        <View style={styles.holdCard}>
-          <Text>Hold</Text>
-        </View>
+        {selectedCards.map((isSelected, index) => (
+          <View
+            key={`label-${index}`}
+            style={isSelected ? styles.swapCard : styles.holdCard}
+          >
+            <Text>{isSelected ? "Swap" : "Hold"}</Text>
+          </View>
+        ))}
       </View>
 
       {/* Displays the active 5-card hand */}
       <View style={styles.cardContainer}>
         {cards.map((card, index) => (
-          <View key={card.id} style={styles.card}>
+          <Pressable
+            key={card.id}
+            style={[styles.card, selectedCards[index] && styles.cardSelected]}
+            onPress={() => toggleCardSelection(index)}
+          >
             <Image
               source={getCardImageSource(card)}
               style={styles.cardImage}
               resizeMode="contain"
             />
-          </View>
+          </Pressable>
         ))}
       </View>
 
@@ -185,9 +224,7 @@ export default function Game() {
       {/* Displays the player's actions */}
       <View style={styles.actionContainer}>
         <Pressable
-          onPress={() => {
-            console.log("swap Pressed");
-          }}
+          onPress={handleSwapCards}
           style={({ pressed }) => [
             styles.action,
             pressed && styles.actionPressed,
@@ -250,7 +287,7 @@ const styles = StyleSheet.create({
   },
   holdCardContainer: {
     flexDirection: "row",
-    width: "65%",
+    width: "59%",
     height: "5%",
     marginTop: 45,
   },
@@ -272,13 +309,13 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     flexDirection: "row",
-    width: "65%",
-    height: "30%",
+    width: "59%",
+    height: "28%",
     marginTop: 25,
   },
   card: {
     flex: 1,
-    marginHorizontal: 6,
+    marginHorizontal: 12,
     borderRadius: 10,
     overflow: "hidden",
   },
@@ -286,6 +323,10 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: 10,
+  },
+  cardSelected: {
+    borderWidth: 3,
+    borderColor: "yellow",
   },
   betContainer: {
     flexDirection: "row",
