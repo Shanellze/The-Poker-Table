@@ -28,6 +28,67 @@ export type Card = {
   value: number;
 };
 
+export const cardImageMap: Record<string, any> = {
+  "2-hearts": require("../../assets/images/cards/2_of_hearts.png"),
+  "3-hearts": require("../../assets/images/cards/3_of_hearts.png"),
+  "4-hearts": require("../../assets/images/cards/4_of_hearts.png"),
+  "5-hearts": require("../../assets/images/cards/5_of_hearts.png"),
+  "6-hearts": require("../../assets/images/cards/6_of_hearts.png"),
+  "7-hearts": require("../../assets/images/cards/7_of_hearts.png"),
+  "8-hearts": require("../../assets/images/cards/8_of_hearts.png"),
+  "9-hearts": require("../../assets/images/cards/9_of_hearts.png"),
+  "10-hearts": require("../../assets/images/cards/10_of_hearts.png"),
+  "J-hearts": require("../../assets/images/cards/jack_of_hearts.png"),
+  "Q-hearts": require("../../assets/images/cards/queen_of_hearts.png"),
+  "K-hearts": require("../../assets/images/cards/king_of_hearts.png"),
+  "A-hearts": require("../../assets/images/cards/ace_of_hearts.png"),
+  "2-diamonds": require("../../assets/images/cards/2_of_diamonds.png"),
+  "3-diamonds": require("../../assets/images/cards/3_of_diamonds.png"),
+  "4-diamonds": require("../../assets/images/cards/4_of_diamonds.png"),
+  "5-diamonds": require("../../assets/images/cards/5_of_diamonds.png"),
+  "6-diamonds": require("../../assets/images/cards/6_of_diamonds.png"),
+  "7-diamonds": require("../../assets/images/cards/7_of_diamonds.png"),
+  "8-diamonds": require("../../assets/images/cards/8_of_diamonds.png"),
+  "9-diamonds": require("../../assets/images/cards/9_of_diamonds.png"),
+  "10-diamonds": require("../../assets/images/cards/10_of_diamonds.png"),
+  "J-diamonds": require("../../assets/images/cards/jack_of_diamonds.png"),
+  "Q-diamonds": require("../../assets/images/cards/queen_of_diamonds.png"),
+  "K-diamonds": require("../../assets/images/cards/king_of_diamonds.png"),
+  "A-diamonds": require("../../assets/images/cards/ace_of_diamonds.png"),
+  "2-clubs": require("../../assets/images/cards/2_of_clubs.png"),
+  "3-clubs": require("../../assets/images/cards/3_of_clubs.png"),
+  "4-clubs": require("../../assets/images/cards/4_of_clubs.png"),
+  "5-clubs": require("../../assets/images/cards/5_of_clubs.png"),
+  "6-clubs": require("../../assets/images/cards/6_of_clubs.png"),
+  "7-clubs": require("../../assets/images/cards/7_of_clubs.png"),
+  "8-clubs": require("../../assets/images/cards/8_of_clubs.png"),
+  "9-clubs": require("../../assets/images/cards/9_of_clubs.png"),
+  "10-clubs": require("../../assets/images/cards/10_of_clubs.png"),
+  "J-clubs": require("../../assets/images/cards/jack_of_clubs.png"),
+  "Q-clubs": require("../../assets/images/cards/queen_of_clubs.png"),
+  "K-clubs": require("../../assets/images/cards/king_of_clubs.png"),
+  "A-clubs": require("../../assets/images/cards/ace_of_clubs.png"),
+  "2-spades": require("../../assets/images/cards/2_of_spades.png"),
+  "3-spades": require("../../assets/images/cards/3_of_spades.png"),
+  "4-spades": require("../../assets/images/cards/4_of_spades.png"),
+  "5-spades": require("../../assets/images/cards/5_of_spades.png"),
+  "6-spades": require("../../assets/images/cards/6_of_spades.png"),
+  "7-spades": require("../../assets/images/cards/7_of_spades.png"),
+  "8-spades": require("../../assets/images/cards/8_of_spades.png"),
+  "9-spades": require("../../assets/images/cards/9_of_spades.png"),
+  "10-spades": require("../../assets/images/cards/10_of_spades.png"),
+  "J-spades": require("../../assets/images/cards/jack_of_spades.png"),
+  "Q-spades": require("../../assets/images/cards/queen_of_spades.png"),
+  "K-spades": require("../../assets/images/cards/king_of_spades.png"),
+  "A-spades": require("../../assets/images/cards/ace_of_spades.png"),
+  "red-joker": require("../../assets/images/cards/red_joker.png"),
+  "black-joker": require("../../assets/images/cards/black_joker.png"),
+};
+
+export function getCardImageSource(card: Card) {
+  return cardImageMap[card.id] ?? cardImageMap["red-joker"];
+}
+
 const suits: Suit[] = ["hearts", "diamonds", "clubs", "spades"];
 const ranks: Rank[] = [
   "2",

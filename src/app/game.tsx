@@ -1,76 +1,23 @@
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { ActionButton } from "../components/actionButton";
+import { BetSetup } from "../components/betSetup";
+import { HandResult } from "../components/handResult";
+import { HoldSwapLabels } from "../components/holdSwapLabels";
+import { PauseButton } from "../components/pauseButton";
+import { PlayerBank } from "../components/playerBank";
+import { PlayersHand } from "../components/playersHand";
+import { RuleList } from "../components/ruleList";
 import {
   createFreshDeck,
   dealHand,
   swapSelectedCards,
   type Card,
 } from "../utils/deck";
-
-const cardImageMap: Record<string, any> = {
-  "2-hearts": require("../../assets/images/cards/2_of_hearts.png"),
-  "3-hearts": require("../../assets/images/cards/3_of_hearts.png"),
-  "4-hearts": require("../../assets/images/cards/4_of_hearts.png"),
-  "5-hearts": require("../../assets/images/cards/5_of_hearts.png"),
-  "6-hearts": require("../../assets/images/cards/6_of_hearts.png"),
-  "7-hearts": require("../../assets/images/cards/7_of_hearts.png"),
-  "8-hearts": require("../../assets/images/cards/8_of_hearts.png"),
-  "9-hearts": require("../../assets/images/cards/9_of_hearts.png"),
-  "10-hearts": require("../../assets/images/cards/10_of_hearts.png"),
-  "J-hearts": require("../../assets/images/cards/jack_of_hearts.png"),
-  "Q-hearts": require("../../assets/images/cards/queen_of_hearts.png"),
-  "K-hearts": require("../../assets/images/cards/king_of_hearts.png"),
-  "A-hearts": require("../../assets/images/cards/ace_of_hearts.png"),
-  "2-diamonds": require("../../assets/images/cards/2_of_diamonds.png"),
-  "3-diamonds": require("../../assets/images/cards/3_of_diamonds.png"),
-  "4-diamonds": require("../../assets/images/cards/4_of_diamonds.png"),
-  "5-diamonds": require("../../assets/images/cards/5_of_diamonds.png"),
-  "6-diamonds": require("../../assets/images/cards/6_of_diamonds.png"),
-  "7-diamonds": require("../../assets/images/cards/7_of_diamonds.png"),
-  "8-diamonds": require("../../assets/images/cards/8_of_diamonds.png"),
-  "9-diamonds": require("../../assets/images/cards/9_of_diamonds.png"),
-  "10-diamonds": require("../../assets/images/cards/10_of_diamonds.png"),
-  "J-diamonds": require("../../assets/images/cards/jack_of_diamonds.png"),
-  "Q-diamonds": require("../../assets/images/cards/queen_of_diamonds.png"),
-  "K-diamonds": require("../../assets/images/cards/king_of_diamonds.png"),
-  "A-diamonds": require("../../assets/images/cards/ace_of_diamonds.png"),
-  "2-clubs": require("../../assets/images/cards/2_of_clubs.png"),
-  "3-clubs": require("../../assets/images/cards/3_of_clubs.png"),
-  "4-clubs": require("../../assets/images/cards/4_of_clubs.png"),
-  "5-clubs": require("../../assets/images/cards/5_of_clubs.png"),
-  "6-clubs": require("../../assets/images/cards/6_of_clubs.png"),
-  "7-clubs": require("../../assets/images/cards/7_of_clubs.png"),
-  "8-clubs": require("../../assets/images/cards/8_of_clubs.png"),
-  "9-clubs": require("../../assets/images/cards/9_of_clubs.png"),
-  "10-clubs": require("../../assets/images/cards/10_of_clubs.png"),
-  "J-clubs": require("../../assets/images/cards/jack_of_clubs.png"),
-  "Q-clubs": require("../../assets/images/cards/queen_of_clubs.png"),
-  "K-clubs": require("../../assets/images/cards/king_of_clubs.png"),
-  "A-clubs": require("../../assets/images/cards/ace_of_clubs.png"),
-  "2-spades": require("../../assets/images/cards/2_of_spades.png"),
-  "3-spades": require("../../assets/images/cards/3_of_spades.png"),
-  "4-spades": require("../../assets/images/cards/4_of_spades.png"),
-  "5-spades": require("../../assets/images/cards/5_of_spades.png"),
-  "6-spades": require("../../assets/images/cards/6_of_spades.png"),
-  "7-spades": require("../../assets/images/cards/7_of_spades.png"),
-  "8-spades": require("../../assets/images/cards/8_of_spades.png"),
-  "9-spades": require("../../assets/images/cards/9_of_spades.png"),
-  "10-spades": require("../../assets/images/cards/10_of_spades.png"),
-  "J-spades": require("../../assets/images/cards/jack_of_spades.png"),
-  "Q-spades": require("../../assets/images/cards/queen_of_spades.png"),
-  "K-spades": require("../../assets/images/cards/king_of_spades.png"),
-  "A-spades": require("../../assets/images/cards/ace_of_spades.png"),
-  "red-joker": require("../../assets/images/cards/red_joker.png"),
-  "black-joker": require("../../assets/images/cards/black_joker.png"),
-};
-
-function getCardImageSource(card: Card) {
-  return cardImageMap[card.id] ?? cardImageMap["red-joker"];
-}
+import { evaluateHand } from "../utils/winningHands";
 
 export default function Game() {
-  const router = useRouter();
+  const maxBalance = 1000;
   const [cards, setCards] = useState<Card[]>([]);
   const [remainingDeck, setRemainingDeck] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<boolean[]>([
@@ -80,15 +27,36 @@ export default function Game() {
     false,
     false,
   ]);
+  const [handResult, setHandResult] = useState<string>("Pending");
+  const [balance, setBalance] = useState(maxBalance);
+  const [bet, setBet] = useState(1);
+  const [betInput, setBetInput] = useState("1");
+  const [isRoundStarted, setIsRoundStarted] = useState(false);
 
-  useEffect(() => {
+  const dealRound = () => {
     const { shuffledDeck } = createFreshDeck();
     const { hand, remainingDeck: leftDeck } = dealHand(shuffledDeck, 5);
     setCards(hand);
     setRemainingDeck(leftDeck);
-  }, []);
+    setSelectedCards([false, false, false, false, false]);
+    setHandResult("Pending");
+    setIsRoundStarted(true);
+  };
+
+  const confirmBet = () => {
+    const parsedBet = Number(betInput) || 0;
+    const safeBet = Math.min(Math.max(Math.round(parsedBet), 1), balance);
+
+    setBet(safeBet);
+    setBetInput(String(safeBet));
+    dealRound();
+  };
 
   const toggleCardSelection = (index: number) => {
+    if (!isRoundStarted) {
+      return;
+    }
+
     setSelectedCards((current) =>
       current.map((selected, currentIndex) =>
         currentIndex === index ? !selected : selected,
@@ -96,143 +64,84 @@ export default function Game() {
     );
   };
 
-  const handleSwapCards = () => {
+  const handleConfirmTurn = () => {
+    if (!isRoundStarted) {
+      return;
+    }
+
     const indexesToSwap = selectedCards
       .map((selected, index) => (selected ? index : -1))
       .filter((index) => index >= 0);
 
-    if (indexesToSwap.length === 0) {
-      return;
+    let nextHand = [...cards];
+    let nextDeck = [...remainingDeck];
+
+    if (indexesToSwap.length > 0) {
+      const result = swapSelectedCards(cards, indexesToSwap, remainingDeck);
+      nextHand = result.updatedHand;
+      nextDeck = result.updatedRemainingDeck;
     }
 
-    const { updatedHand, updatedRemainingDeck } = swapSelectedCards(
-      cards,
-      indexesToSwap,
-      remainingDeck,
-    );
+    const evaluatedHand = evaluateHand(nextHand);
 
-    setCards(updatedHand);
-    setRemainingDeck(updatedRemainingDeck);
+    setCards(nextHand);
+    setRemainingDeck(nextDeck);
     setSelectedCards([false, false, false, false, false]);
+    setHandResult(evaluatedHand === "Nothing" ? "Nothing" : evaluatedHand);
   };
 
   return (
     <View style={styles.container}>
-      <Pressable
-        onPress={() => {
-          router.push("/pause");
-        }}
-        style={({ pressed }) => [
-          styles.pauseButton,
-          pressed && styles.pauseButtonPressed,
-        ]}
-      >
-        <View style={styles.menuIcon}>
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-          <View style={styles.menuLine} />
-        </View>
-      </Pressable>
+      <PauseButton />
 
-      {/* Displays the payout multipliers and winning combination hierarchies */}
-      <View style={styles.ruleContainer}>
-        <View style={styles.rule}>
-          <Text>Five Of A Kind</Text>
-          <Text>x100</Text>
-        </View>
-        <View style={styles.rule}>
-          <Text>Royal Straight Flush</Text>
-          <Text>x50</Text>
-        </View>
-        <View style={styles.rule}>
-          <Text>Straight Flush</Text>
-          <Text>x25</Text>
-        </View>
-        <View style={styles.rule}>
-          <Text>Four Of A Kind</Text>
-          <Text>x10</Text>
-        </View>
-        <View style={styles.rule}>
-          <Text>Full House</Text>
-          <Text>x7</Text>
-        </View>
-        <View style={styles.rule}>
-          <Text>Flush</Text>
-          <Text>x7</Text>
-        </View>
-        <View style={styles.rule}>
-          <Text>Straight</Text>
-          <Text>x5</Text>
-        </View>
-        <View style={styles.rule}>
-          <Text>Three Of A Kind</Text>
-          <Text>x3</Text>
-        </View>
-        <View style={styles.rule}>
-          <Text>Two Pair</Text>
-          <Text>x2</Text>
-        </View>
-        <View style={styles.rule}>
-          <Text>One Pair</Text>
-          <Text>x1</Text>
-        </View>
-      </View>
+      <RuleList />
 
-      {/* Displays which cards are held and which are swapped */}
-      <View style={styles.holdCardContainer}>
-        {selectedCards.map((isSelected, index) => (
-          <View
-            key={`label-${index}`}
-            style={isSelected ? styles.swapCard : styles.holdCard}
-          >
-            <Text>{isSelected ? "Swap" : "Hold"}</Text>
-          </View>
-        ))}
-      </View>
+      {!isRoundStarted ? (
+        <BetSetup
+          balance={balance}
+          betInput={betInput}
+          onBetInputChange={(value) => {
+            const cleaned = value.replace(/[^\d]/g, "");
+            const numericValue = Number(cleaned || "0");
+            const cappedValue = Math.min(numericValue, balance);
+            setBetInput(String(cappedValue));
+          }}
+        />
+      ) : null}
 
-      {/* Displays the active 5-card hand */}
-      <View style={styles.cardContainer}>
-        {cards.map((card, index) => (
-          <Pressable
-            key={card.id}
-            style={[styles.card, selectedCards[index] && styles.cardSelected]}
-            onPress={() => toggleCardSelection(index)}
-          >
-            <Image
-              source={getCardImageSource(card)}
-              style={styles.cardImage}
-              resizeMode="contain"
-            />
-          </Pressable>
-        ))}
-      </View>
+      {isRoundStarted ? (
+        <>
+          {/* Displays which cards are held and which are swapped */}
+          <HoldSwapLabels selectedCards={selectedCards} />
+
+          {/* Displays the active 5-card hand */}
+          <PlayersHand
+            cards={cards}
+            selectedCards={selectedCards}
+            onCardPress={toggleCardSelection}
+          />
+        </>
+      ) : null}
+
+      {isRoundStarted ? <HandResult handResult={handResult} /> : null}
 
       {/* Displays the player's financial information */}
-      <View style={styles.betContainer}>
-        {/* Displays the player's total cumulative chips remaining  */}
-        <View style={styles.balanceContainer}>
-          <Text>Balance</Text>
-          <Text>1000</Text>
-        </View>
-        {/* Displays the player's current bet */}
-        <View style={styles.currentBetContainer}>
-          <Text>Current Bet</Text>
-          <Text>1</Text>
-        </View>
-      </View>
+      <PlayerBank
+        balance={balance}
+        bet={bet}
+        betInput={betInput}
+        isRoundStarted={isRoundStarted}
+      />
 
-      {/* Displays the player's actions */}
-      <View style={styles.actionContainer}>
-        <Pressable
-          onPress={handleSwapCards}
-          style={({ pressed }) => [
-            styles.action,
-            pressed && styles.actionPressed,
-          ]}
-        >
-          <Text>SWAP CARD</Text>
-        </Pressable>
-      </View>
+      {!isRoundStarted ? (
+        <View style={styles.actionContainer}>
+          <ActionButton label="CONFIRM" onPress={confirmBet} />
+        </View>
+      ) : (
+        <View style={styles.actionContainer}>
+          <ActionButton label="CONFIRM" onPress={handleConfirmTurn} />
+        </View>
+      )}
     </View>
   );
 }
@@ -244,107 +153,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  pauseButton: {
-    position: "absolute",
-    top: 14,
-    right: 14,
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: "#f1f1f1",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
-  },
-  pauseButtonPressed: {
-    backgroundColor: "#d9d9d9",
-  },
-  menuIcon: {
-    width: 16,
-    height: 14,
-    justifyContent: "space-between",
-  },
-  menuLine: {
-    width: "100%",
-    height: 2,
-    borderRadius: 2,
-    backgroundColor: "#1a1a1a",
-  },
-  ruleContainer: {
-    flexDirection: "row",
-    width: "90%",
-    height: "20%",
-    marginHorizontal: 4,
-    padding: 20,
-    marginTop: 20,
-    borderRadius: 10,
-    backgroundColor: "white",
-  },
-  rule: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  holdCardContainer: {
-    flexDirection: "row",
-    width: "59%",
-    height: "5%",
-    marginTop: 45,
-  },
-  swapCard: {
-    flex: 1,
-    marginHorizontal: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 10,
-    backgroundColor: "red",
-  },
-  holdCard: {
-    flex: 1,
-    marginHorizontal: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 10,
-    backgroundColor: "blue",
-  },
-  cardContainer: {
-    flexDirection: "row",
-    width: "59%",
-    height: "28%",
-    marginTop: 25,
-  },
-  card: {
-    flex: 1,
-    marginHorizontal: 12,
-    borderRadius: 10,
-    overflow: "hidden",
-  },
-  cardImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 10,
-  },
-  cardSelected: {
-    borderWidth: 3,
-    borderColor: "yellow",
-  },
-  betContainer: {
-    flexDirection: "row",
-    width: "90%",
-    height: "10%",
-    marginTop: 60,
-    backgroundColor: "white",
-  },
-  balanceContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  currentBetContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   actionContainer: {
     flexDirection: "row",
     width: "90%",
@@ -352,14 +160,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
     backgroundColor: "white",
-  },
-  action: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "red",
-  },
-  actionPressed: {
-    backgroundColor: "#c91c1c",
   },
 });
