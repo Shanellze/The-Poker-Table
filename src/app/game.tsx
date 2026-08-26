@@ -3,6 +3,7 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { ActionButton } from "../components/actionButton";
 import { BetSetup } from "../components/betSetup";
+import { CardOrderList } from "../components/cardOrderList";
 import { HandResult } from "../components/handResult";
 import { HoldSwapLabels } from "../components/holdSwapLabels";
 import { PauseButton } from "../components/pauseButton";
@@ -114,7 +115,7 @@ export default function Game() {
     <View style={styles.container}>
       <PauseButton />
 
-      <RuleList />
+      {isRoundResolved ? <CardOrderList /> : <RuleList />}
 
       {!isRoundStarted ? (
         <BetSetup
