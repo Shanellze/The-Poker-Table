@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { ActionButton } from "../components/actionButton";
 import { BetSetup } from "../components/betSetup";
@@ -22,6 +22,7 @@ import { evaluateHand } from "../utils/winningHands";
 export default function Game() {
   const router = useRouter();
   const maxBalance = 1000;
+  const gameOverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
   const [remainingDeck, setRemainingDeck] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<boolean[]>([
@@ -36,6 +37,14 @@ export default function Game() {
   const [bet, setBet] = useState(1);
   const [betInput, setBetInput] = useState("1");
   const [isRoundStarted, setIsRoundStarted] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (gameOverTimeoutRef.current) {
+        clearTimeout(gameOverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const dealRound = () => {
     const { shuffledDeck } = createFreshDeck();
@@ -101,12 +110,24 @@ export default function Game() {
       setBalance((currentBalance) => currentBalance + winnings);
       setBet(winnings);
       setHandResult(`Won - ${evaluatedHand} (${winnings})`);
+      if (gameOverTimeoutRef.current) {
+        clearTimeout(gameOverTimeoutRef.current);
+      }
+      gameOverTimeoutRef.current = setTimeout(() => {
+        router.replace("/");
+      }, 5000);
       return;
     }
 
     setHandResult(
       `Lost - ${evaluatedHand === "Nothing" ? "No Pair" : evaluatedHand}`,
     );
+    if (gameOverTimeoutRef.current) {
+      clearTimeout(gameOverTimeoutRef.current);
+    }
+    gameOverTimeoutRef.current = setTimeout(() => {
+      router.replace("/");
+    }, 5000);
   };
 
   const isRoundResolved = handResult !== "Pending";
