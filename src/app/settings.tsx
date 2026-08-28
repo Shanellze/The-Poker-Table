@@ -1,12 +1,12 @@
 import Slider from "@react-native-community/slider";
 import { useRouter } from "expo-router";
-import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useAudioSettings } from "../context/audioSettingsContext";
 
 export default function Settings() {
   const router = useRouter();
-  const [musicSliderValue, setMusicSliderValue] = useState(0.5);
-  const [sfxSliderValue, setSfxSliderValue] = useState(0.5);
+  const { musicVolume, setMusicVolume, sfxVolume, setSfxVolume } =
+    useAudioSettings();
 
   return (
     <View style={styles.overlay}>
@@ -22,8 +22,8 @@ export default function Settings() {
             style={styles.slider}
             minimumValue={0}
             maximumValue={1}
-            value={musicSliderValue}
-            onValueChange={(value) => setMusicSliderValue(value)}
+            value={musicVolume}
+            onValueChange={setMusicVolume}
             minimumTrackTintColor="#1EB1FC"
             maximumTrackTintColor="#d3d3d3"
             thumbTintColor="#1EB1FC"
@@ -37,8 +37,8 @@ export default function Settings() {
             style={styles.slider}
             minimumValue={0}
             maximumValue={1}
-            value={sfxSliderValue}
-            onValueChange={(value) => setSfxSliderValue(value)}
+            value={sfxVolume}
+            onValueChange={setSfxVolume}
             minimumTrackTintColor="#1EB1FC"
             maximumTrackTintColor="#d3d3d3"
             thumbTintColor="#1EB1FC"
