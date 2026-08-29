@@ -1,5 +1,6 @@
 import { useAudioPlayer } from "expo-audio";
 import { Stack } from "expo-router";
+import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect } from "react";
 import {
   AudioSettingsProvider,
@@ -43,6 +44,10 @@ function AppStack() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+  }, []);
+
   return (
     <AudioSettingsProvider>
       <AppStack />
